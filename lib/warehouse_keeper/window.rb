@@ -6,10 +6,10 @@ module WarehouseKeeper
     WIDTH  = 800
     HEIGHT = 600
 
-    def initialize
-      super(WIDTH,HEIGHT,false)
+    def initialize(level = nil)
+      super(WIDTH, HEIGHT, false)
       self.caption = "Warehouse Keeper"
-      @level = WarehouseKeeper::Level.from_file(1)
+      @level = WarehouseKeeper::Level.from_file(level || 1)
 
       @floor = Gosu::Image.new(self, File.join(__dir__,
                                                %w[ .. .. images
