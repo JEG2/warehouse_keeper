@@ -2,9 +2,11 @@ GEM
   remote: https://rubygems.org/
   specs:
     gosu (0.7.50)
+    rake (10.1.0)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   gosu
+  rake
