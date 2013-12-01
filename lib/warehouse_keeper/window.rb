@@ -1,48 +1,37 @@
-require 'gosu'
+require "gosu"
 
 module WarehouseKeeper
   class Window < Gosu::Window
+    WIDTH      = 800
+    HEIGHT     = 600
+    FULLSCREEN = false
 
-    WIDTH  = 800
-    HEIGHT = 600
+    IMAGES_DIR = File.join(__dir__, *%w[.. .. images])
 
-    def initialize(level = nil)
-      super(WIDTH, HEIGHT, false)
+    def initialize(start_level = nil)
+      super(WIDTH, HEIGHT, FULLSCREEN)
       self.caption = "Warehouse Keeper"
 
-      @current_level = level || 1
-      @level = WarehouseKeeper::Level.from_file(@current_level)
+      @current_level = start_level.is_a?(Integer) &&
+                       start_level.between?(1, 89) ? start_level : 1
+      @level         = WarehouseKeeper::Level.from_file(@current_level)
 
-      @floor = Gosu::Image.new(self, File.join(__dir__,
-                                               %w[ .. .. images
-                                                   Stone\ Block.png ]
-                                               ), true)
-      @goal = Gosu::Image.new(self, File.join(__dir__,
-                                              %w[ .. .. images
-                                                   Wood\ Block.png ]
-                                              ), true)
+      @images = { }
+      load_image(:floor,     "Stone Block",         true)
+      load_image(:goal,      "Wood Block",          true)
+      load_image(:wall,      "Wall Block Tall",     true)
+      load_image(:player,    "Character Horn Girl", false)
+      load_image(:floor_gem, "Gem Orange",          false)
+      load_image(:goal_gem,  "Gem Green",           false)
 
-      @wall = Gosu::Image.new(self, File.join(__dir__,
-                                              %w[ .. .. images
-                                                   Wall\ Block\ Tall.png ]
-                                              ), true)
-
-      @player = Gosu::Image.new(self, File.join(__dir__,
-                                                %w[ .. .. images
-                                                   Character\ Horn\ Girl.png ]
-                                                ), true)
-      @gem = Gosu::Image.new(self, File.join(__dir__,
-                                                %w[ .. .. images
-                                                   Gem\ Orange.png ]
-                                                ), true)
-      @goal_gem = Gosu::Image.new(self, File.join(__dir__,
-                                                %w[ .. .. images
-                                                   Gem\ Green.png ]
-                                                ), true)
-
+      @scale_factor = [ HEIGHT.to_f / @level.to_a.size / 80,
+                        WIDTH.to_f / @level.first.size / 101 ].min
     end
 
+    attr_reader :images, :scale_factor
+
     def update
+
     end
 
     def button_down(button_id)
@@ -63,37 +52,44 @@ module WarehouseKeeper
     end
 
     def draw
-      y_scale = (HEIGHT.to_f / @level.to_a.size) / 80
-      x_scale = (WIDTH.to_f / @level.first.size) / 101
-
-      factor  = [y_scale, x_scale].min
-      scale(factor) {
+      scale(scale_factor) do
         @level.each_with_index do |row, y|
           row.each_with_index do |cell, x|
-            if cell.is_a?(WarehouseKeeper::Level::Goal)
-              @goal.draw(x * 101, y * 80, 0)
-
-              if cell.contents.is_a?(WarehouseKeeper::Level::Player)
-                @player.draw(x * 101, y * 80 - 36, 0)
-              elsif cell.contents.is_a?(WarehouseKeeper::Level::Gem)
-                @goal_gem.draw(x * 101, y * 80 - 36, 0)
-              end
-            elsif cell.is_a?(WarehouseKeeper::Level::Floor)
-              @floor.draw(x * 101, y * 80, 0)
-
-              if cell.contents.is_a?(WarehouseKeeper::Level::Player)
-                @player.draw(x * 101, y * 80 - 36, 0)
-              elsif cell.contents.is_a?(WarehouseKeeper::Level::Gem)
-                @gem.draw(x * 101, y * 80 - 36, 0)
-              end
-
-            elsif cell.is_a?(WarehouseKeeper::Level::Wall)
-              @wall.draw(x * 101, y * 80, 0)
+            x_offset, y_offset = x * 101, y * 80
+            case cell
+            when WarehouseKeeper::Level::Goal
+              draw_image(:goal, x_offset, y_offset)
+              draw_contents(cell, x_offset, y_offset)
+            when WarehouseKeeper::Level::Floor
+              draw_image(:floor, x_offset, y_offset)
+              draw_contents(cell, x_offset, y_offset)
+            when WarehouseKeeper::Level::Wall
+              draw_image(:wall, x * 101, y * 80)
             end
           end
         end
-      }
+      end
     end
 
+    private
+
+    def load_image(name, file_name, tileable)
+      images[name] = Gosu::Image.new( self,
+                                      File.join(IMAGES_DIR, "#{file_name}.png"),
+                                      tileable )
+    end
+
+    def draw_image(name, x, y, z = 0)
+      images[name].draw(x, y, z)
+    end
+
+    def draw_contents(cell, x, y)
+      return if cell.contents.nil?
+      name = cell.contents.class.name[/\w+\z/].downcase
+      if name == "gem"
+        name = "#{cell.class.name[/\w+\z/].downcase}_#{name}"
+      end
+      draw_image(name.to_sym, x, y - 36)
+    end
   end
 end
