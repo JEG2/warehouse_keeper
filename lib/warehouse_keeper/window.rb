@@ -9,7 +9,9 @@ module WarehouseKeeper
     def initialize(level = nil)
       super(WIDTH, HEIGHT, false)
       self.caption = "Warehouse Keeper"
-      @level = WarehouseKeeper::Level.from_file(level || 1)
+
+      @current_level = level || 1
+      @level = WarehouseKeeper::Level.from_file(@current_level)
 
       @floor = Gosu::Image.new(self, File.join(__dir__,
                                                %w[ .. .. images
@@ -55,6 +57,8 @@ module WarehouseKeeper
         @level.move_down
       when Gosu::KbLeft, Gosu::KbA
         @level.move_left
+      when Gosu::KbR
+        @level = WarehouseKeeper::Level.from_file(@current_level)
       end
     end
 
