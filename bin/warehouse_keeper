@@ -1,5 +1,6 @@
 #!/usr/bin/env ruby
 
+require "bundler/setup"
 require_relative "../lib/warehouse_keeper"
 
 level = ARGV.first.to_i if ARGV.first =~ /\A\d+\z/
