@@ -33,10 +33,29 @@ module WarehouseKeeper
                                                 %w[ .. .. images
                                                    Gem\ Orange.png ]
                                                 ), true)
+      @goal_gem = Gosu::Image.new(self, File.join(__dir__,
+                                                %w[ .. .. images
+                                                   Gem\ Green.png ]
+                                                ), true)
 
     end
 
     def update
+    end
+
+    def button_down(button_id)
+      case button_id
+      when Gosu::KbEscape
+        close
+      when Gosu::KbUp, Gosu::KbW
+        @level.move_up
+      when Gosu::KbRight, Gosu::KbD
+        @level.move_right
+      when Gosu::KbDown, Gosu::KbS
+        @level.move_down
+      when Gosu::KbLeft, Gosu::KbA
+        @level.move_left
+      end
     end
 
     def draw
@@ -49,6 +68,12 @@ module WarehouseKeeper
           row.each_with_index do |cell, x|
             if cell.is_a?(WarehouseKeeper::Level::Goal)
               @goal.draw(x * 101, y * 80, 0)
+
+              if cell.contents.is_a?(WarehouseKeeper::Level::Player)
+                @player.draw(x * 101, y * 80 - 36, 0)
+              elsif cell.contents.is_a?(WarehouseKeeper::Level::Gem)
+                @goal_gem.draw(x * 101, y * 80 - 36, 0)
+              end
             elsif cell.is_a?(WarehouseKeeper::Level::Floor)
               @floor.draw(x * 101, y * 80, 0)
 
