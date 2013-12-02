@@ -8,13 +8,11 @@ module WarehouseKeeper
 
     IMAGES_DIR = File.join(__dir__, *%w[.. .. images])
 
-    def initialize(start_level = nil)
+    def initialize(start_level)
       super(WIDTH, HEIGHT, FULLSCREEN)
       self.caption = "Warehouse Keeper"
 
-      @current_level = start_level.is_a?(Integer) &&
-                       start_level.between?(1, 89) ? start_level : 1
-      @level         = WarehouseKeeper::Level.from_file(@current_level)
+      @game = Game.new(start_level)
 
       @images = { }
       load_image(:floor,     "Stone Block",         true)
@@ -24,11 +22,11 @@ module WarehouseKeeper
       load_image(:floor_gem, "Gem Orange",          false)
       load_image(:goal_gem,  "Gem Green",           false)
 
-      @scale_factor = [ HEIGHT.to_f / @level.to_a.size / 80,
-                        WIDTH.to_f / @level.first.size / 101 ].min
+      @scale_factor = [ HEIGHT.to_f / game.level.to_a.size / 80,
+                        WIDTH.to_f / game.level.first.size / 101 ].min
     end
 
-    attr_reader :images, :scale_factor
+    attr_reader :game, :images, :scale_factor
 
     def update
 
@@ -39,21 +37,21 @@ module WarehouseKeeper
       when Gosu::KbEscape
         close
       when Gosu::KbUp, Gosu::KbW
-        @level.move_up
+        game.move_up
       when Gosu::KbRight, Gosu::KbD
-        @level.move_right
+        game.move_right
       when Gosu::KbDown, Gosu::KbS
-        @level.move_down
+        game.move_down
       when Gosu::KbLeft, Gosu::KbA
-        @level.move_left
+        game.move_left
       when Gosu::KbR
-        @level = WarehouseKeeper::Level.from_file(@current_level)
+        game.reset
       end
     end
 
     def draw
       scale(scale_factor) do
-        @level.each_with_index do |row, y|
+        game.level.each_with_index do |row, y|
           row.each_with_index do |cell, x|
             x_offset, y_offset = x * 101, y * 80
             case cell
