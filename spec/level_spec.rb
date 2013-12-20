@@ -56,6 +56,11 @@ END_LEVEL
     tricky.map { |row| row.size }.uniq.size.must_equal(1)
   end
 
+  it "knows the dimensions of the level" do
+    tricky.width.must_equal(19)
+    tricky.height.must_equal(11)
+  end
+
   it "ignores cells outside the board" do
     tricky[10, 5].must_be_instance_of(WarehouseKeeper::Level::Void)
     tricky[3, 5].must_be_instance_of(WarehouseKeeper::Level::Floor)

@@ -88,13 +88,24 @@ module WarehouseKeeper
       @rows = rows
     end
 
+    attr_reader :rows
+    private     :rows
+
+    def width
+      rows.first.size
+    end
+
+    def height
+      rows.size
+    end
+
     def [](x, y)
-      return if x < 0 || y < 0 || x >= @rows.first.size || y >= @rows.size
-      @rows[y][x]
+      return if x < 0 || y < 0 || x >= rows.first.size || y >= rows.size
+      rows[y][x]
     end
 
     def each(&block)
-      @rows.each(&block)
+      rows.each(&block)
     end
   end
 end

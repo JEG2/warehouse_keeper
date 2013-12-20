@@ -22,8 +22,8 @@ module WarehouseKeeper
       load_image(:floor_gem, "Gem Orange",          false)
       load_image(:goal_gem,  "Gem Green",           false)
 
-      @scale_factor = [ HEIGHT.to_f / game.level.to_a.size / 80,
-                        WIDTH.to_f / game.level.first.size / 101 ].min
+      @scale_factor = [ HEIGHT.to_f / game.level.height / 80,
+                        WIDTH.to_f  / game.level.width  / 101 ].min
     end
 
     attr_reader :game, :images, :scale_factor
