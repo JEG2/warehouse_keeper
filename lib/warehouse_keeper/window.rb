@@ -37,13 +37,13 @@ module WarehouseKeeper
       when Gosu::KbEscape
         close
       when Gosu::KbUp, Gosu::KbW
-        game.move_up
+        move(:up)
       when Gosu::KbRight, Gosu::KbD
-        game.move_right
+        move(:right)
       when Gosu::KbDown, Gosu::KbS
-        game.move_down
+        move(:down)
       when Gosu::KbLeft, Gosu::KbA
-        game.move_left
+        move(:left)
       when Gosu::KbR
         game.reset
       end
@@ -88,6 +88,11 @@ module WarehouseKeeper
         name = "#{cell.class.name[/\w+\z/].downcase}_#{name}"
       end
       draw_image(name.to_sym, x, y - 36)
+    end
+
+    def move(direction)
+      game.send("move_#{direction}")
+      game.next_level if game.solved?
     end
   end
 end

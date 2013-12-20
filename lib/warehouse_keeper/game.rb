@@ -100,7 +100,6 @@ module WarehouseKeeper
         elsif !beyond.is_a?(Level::Goal) && cell.is_a?(Level::Goal)
           @gems_on_goal -= 1
         end
-        # return next_level if solved?
       end
       player                             = level[player_x, player_y].contents
       level[player_x, player_y].contents = nil
