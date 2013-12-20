@@ -2,8 +2,8 @@ require "gosu"
 
 module WarehouseKeeper
   class Window < Gosu::Window
-    WIDTH      = 800
-    HEIGHT     = 600
+    WIDTH      = 700
+    HEIGHT     = 510
     FULLSCREEN = false
 
     IMAGES_DIR = File.join(__dir__, *%w[.. .. images])
