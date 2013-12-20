@@ -1,15 +1,11 @@
+require_relative "level"
+
 module WarehouseKeeper
   class Game
     def initialize(start_level)
       @current_level = start_level.is_a?(Integer) &&
-                       start_level.between?(1, 89) ? start_level : 1
+                       start_level.between?(1, 90) ? start_level : 1
       reset
-
-      @player_x     = nil
-      @player_y     = nil
-      @total_gems   = 0
-      @gems_on_goal = 0
-      find_player_and_count_gems
     end
 
     attr_reader :level
@@ -19,6 +15,7 @@ module WarehouseKeeper
 
     def reset
       @level = Level.from_file(current_level)
+      find_player_and_count_gems
     end
 
     def move_up
@@ -46,17 +43,26 @@ module WarehouseKeeper
       reset
     end
 
+    def over?
+      level.nil?
+    end
+
     private
 
     def find_player_and_count_gems
+      @player_x     = nil
+      @player_y     = nil
+      @total_gems   = 0
+      @gems_on_goal = 0
+
+      return if level.nil?
+
       level.each_with_index do |row, y|
         row.each_with_index do |cell, x|
-          if level[x, y].is_a?(Level::Floor) &&
-             level[x, y].contents.is_a?(Level::Player)
+          if level[x, y].has_player?
             @player_x = x
             @player_y = y
-          elsif level[x, y].is_a?(Level::Floor) &&
-             level[x, y].contents.is_a?(Level::Gem)
+          elsif level[x, y].has_gem?
             @total_gems   += 1
             @gems_on_goal += 1 if level[x, y].is_a?(Level::Goal)
           end
@@ -80,13 +86,13 @@ module WarehouseKeeper
     def can_move_to?(cell, cell_beyond)
       cell.is_a?(Level::Floor) &&
       ( cell.contents.nil? ||
-        ( cell.contents.is_a?(Level::Gem) &&
+        ( cell.has_gem? &&
           cell_beyond.is_a?(Level::Floor) &&
           cell_beyond.contents.nil? ) )
     end
 
     def move_to(cell, beyond)
-      if cell.contents.is_a?(Level::Gem)
+      if cell.has_gem?
         beyond.contents = cell.contents
         cell.contents   = nil
         if beyond.is_a?(Level::Goal) && !cell.is_a?(Level::Goal)
@@ -94,7 +100,7 @@ module WarehouseKeeper
         elsif !beyond.is_a?(Level::Goal) && cell.is_a?(Level::Goal)
           @gems_on_goal -= 1
         end
-        return next_level if solved?
+        # return next_level if solved?
       end
       player                             = level[player_x, player_y].contents
       level[player_x, player_y].contents = nil

@@ -1,13 +1,32 @@
 module WarehouseKeeper
   class Level
-    class Void; end
-    class Wall; end
+    LEVELS_FILE = File.join(__dir__, *%w[.. .. levels original_and_extra.txt])
+
+    module Empty
+      def contents;    nil   end
+      def has_player?; false end
+      def has_gem?;    false end
+    end
+    class Void
+      include Empty
+    end
+    class Wall
+      include Empty
+    end
     class Floor
       def initialize(contents = nil)
         @contents = contents
       end
 
       attr_accessor :contents
+
+      def has_player?
+        contents.is_a?(Player)
+      end
+
+      def has_gem?
+        contents.is_a?(Gem)
+      end
     end
     class Goal < Floor; end
 
@@ -20,7 +39,8 @@ module WarehouseKeeper
       " " => lambda { Floor.new             },
       "." => lambda { Goal.new              },
       "@" => lambda { Floor.new(Player.new) },
-      "$" => lambda { Floor.new(Gem.new)    }
+      "$" => lambda { Floor.new(Gem.new)    },
+      "*" => lambda { Goal.new(Gem.new)     }
     }
 
     def self.parse(string)
@@ -46,11 +66,7 @@ module WarehouseKeeper
       )
     end
 
-    def self.from_file( num, path = File.join( __dir__,
-                                               *%w[ ..
-                                                    ..
-                                                    levels
-                                                    original_and_extra.txt ] ) )
+    def self.from_file(num, path = LEVELS_FILE)
       buffer = [ ]
       File.foreach(path) do |line|
         if line =~ /\A\s*;\s*(\d+)/
@@ -63,6 +79,7 @@ module WarehouseKeeper
           buffer << line
         end
       end
+      nil
     end
 
     include Enumerable
@@ -71,9 +88,7 @@ module WarehouseKeeper
       @rows = rows
     end
 
-    attr_reader :player_start_x, :player_start_y
-
-    def [](x,y)
+    def [](x, y)
       return if x < 0 || y < 0 || x >= @rows.first.size || y >= @rows.size
       @rows[y][x]
     end

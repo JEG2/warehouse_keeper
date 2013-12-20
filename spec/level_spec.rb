@@ -36,12 +36,20 @@ END_LEVEL
 
   it "parses the player" do
     minimal[1, 1].must_be_instance_of(WarehouseKeeper::Level::Floor)
-    minimal[1, 1].contents.must_be_instance_of(WarehouseKeeper::Level::Player)
+    minimal[1, 1].must_be(:has_player?)
   end
 
   it "parses gems" do
     minimal[2, 1].must_be_instance_of(WarehouseKeeper::Level::Floor)
-    minimal[2, 1].contents.must_be_instance_of(WarehouseKeeper::Level::Gem)
+    minimal[2, 1].must_be(:has_gem?)
+  end
+
+  it "parses gems on goals" do
+    level = WarehouseKeeper::Level.parse( "#####\n" +
+                                          "#@ *#\n" +
+                                          "#####\n" )
+    level[3, 1].must_be_instance_of(WarehouseKeeper::Level::Goal)
+    level[3, 1].must_be(:has_gem?)
   end
 
   it "makes all levels square" do
@@ -69,5 +77,9 @@ END_LEVEL
     level_2 = WarehouseKeeper::Level.from_file(2)
     level_2[0, 0].must_be_instance_of(WarehouseKeeper::Level::Wall)
     level_2[12, 0].must_be_instance_of(WarehouseKeeper::Level::Void)
+  end
+
+  it "asking for a level not in the file returns nil" do
+    WarehouseKeeper::Level.from_file(1_000_000).must_be_nil
   end
 end
