@@ -8,6 +8,8 @@ module WarehouseKeeper
 
     IMAGES_DIR = File.join(__dir__, *%w[.. .. images])
 
+    KEY_DELAY = 0.25
+
     def initialize(start_level)
       super(WIDTH, HEIGHT, FULLSCREEN)
       self.caption = "Warehouse Keeper"
@@ -24,29 +26,33 @@ module WarehouseKeeper
 
       @scale_factor = [ HEIGHT.to_f / game.level.height / 80,
                         WIDTH.to_f  / game.level.width  / 101 ].min
-    end
 
-    attr_reader :game, :images, :scale_factor
-
-    def update
-
-    end
-
-    def button_down(button_id)
-      case button_id
-      when Gosu::KbEscape
+      @key_map = KeyMap.new
+      key_map.map_key(Gosu::KbEscape) do
         close
-      when Gosu::KbUp, Gosu::KbW
-        move(:up)
-      when Gosu::KbRight, Gosu::KbD
-        move(:right)
-      when Gosu::KbDown, Gosu::KbS
-        move(:down)
-      when Gosu::KbLeft, Gosu::KbA
-        move(:left)
-      when Gosu::KbR
+      end
+      key_map.map_key(Gosu::KbR) do
         game.reset
       end
+      key_map.map_key(Gosu::KbUp, Gosu::KbW, delay: KEY_DELAY) do
+        move(:up)
+      end
+      key_map.map_key(Gosu::KbRight, Gosu::KbD, delay: KEY_DELAY) do
+        move(:right)
+      end
+      key_map.map_key(Gosu::KbDown, Gosu::KbS, delay: KEY_DELAY) do
+        move(:down)
+      end
+      key_map.map_key(Gosu::KbLeft, Gosu::KbA, delay: KEY_DELAY) do
+        move(:left)
+      end
+    end
+
+    attr_reader :game, :images, :scale_factor, :key_map
+    private     :game, :images, :scale_factor, :key_map
+
+    def update
+      key_map.trigger(self)
     end
 
     def draw
