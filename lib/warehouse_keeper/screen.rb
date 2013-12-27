@@ -41,10 +41,10 @@ module WarehouseKeeper
 
     private
 
-    def load_image(name, file_name, tileable)
-      images[name] = Gosu::Image.new( window,
-                                      File.join(IMAGES_DIR, "#{file_name}.png"),
-                                      tileable )
+    def load_image(name, file_name, tileable, image_type = Gosu::Image)
+      images[name] = image_type.new( window,
+                                     File.join(IMAGES_DIR, "#{file_name}.png"),
+                                     tileable )
     end
 
     def draw_image(name, x, y, z = 0)
