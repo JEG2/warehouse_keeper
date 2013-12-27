@@ -14,7 +14,7 @@ module WarehouseKeeper
     end
 
     def activate_screen(name, *extra_args)
-      @active = screens[name].new(window, *extra_args)
+      @active = screens[name].new(window, self, *extra_args)
     end
 
     def update

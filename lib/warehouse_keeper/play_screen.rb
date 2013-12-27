@@ -8,14 +8,42 @@ module WarehouseKeeper
 
     KEY_DELAY = 0.25
 
-    def initialize(window, game)
+    def init_screen(game)
       @game = game
-
-      super(window)
     end
 
     attr_reader :game
     private     :game
+
+    def init_images
+      load_image(:floor,     "Stone Block",         true)
+      load_image(:goal,      "Wood Block",          true)
+      load_image(:wall,      "Wall Block Tall",     true)
+      load_image(:player,    "Character Horn Girl", false)
+      load_image(:floor_gem, "Gem Orange",          false)
+      load_image(:goal_gem,  "Gem Green",           false)
+    end
+
+    def init_keys
+      map_key(Gosu::KbEscape) do
+        window.close
+      end
+      map_key(Gosu::KbR) do
+        game.reset
+      end
+      map_key(Gosu::KbUp, Gosu::KbW, delay: KEY_DELAY) do
+        move(:up)
+      end
+      map_key(Gosu::KbRight, Gosu::KbD, delay: KEY_DELAY) do
+        move(:right)
+      end
+      map_key(Gosu::KbDown, Gosu::KbS, delay: KEY_DELAY) do
+        move(:down)
+      end
+      map_key(Gosu::KbLeft, Gosu::KbA, delay: KEY_DELAY) do
+        move(:left)
+      end
+    end
 
     def draw
       window.scale(scale_factor) do
@@ -39,36 +67,6 @@ module WarehouseKeeper
 
     private
 
-    def init_images
-      load_image(:floor,     "Stone Block",         true)
-      load_image(:goal,      "Wood Block",          true)
-      load_image(:wall,      "Wall Block Tall",     true)
-      load_image(:player,    "Character Horn Girl", false)
-      load_image(:floor_gem, "Gem Orange",          false)
-      load_image(:goal_gem,  "Gem Green",           false)
-    end
-
-    def init_keys(screen_manager)
-      map_key(Gosu::KbEscape) do
-        window.close
-      end
-      map_key(Gosu::KbR) do
-        game.reset
-      end
-      map_key(Gosu::KbUp, Gosu::KbW, delay: KEY_DELAY) do
-        move(:up)
-      end
-      map_key(Gosu::KbRight, Gosu::KbD, delay: KEY_DELAY) do
-        move(:right)
-      end
-      map_key(Gosu::KbDown, Gosu::KbS, delay: KEY_DELAY) do
-        move(:down)
-      end
-      map_key(Gosu::KbLeft, Gosu::KbA, delay: KEY_DELAY) do
-        move(:left)
-      end
-    end
-
     def scale_factor
       @scale_factor ||= [
         window.height.to_f / game.level.height / TILE_HEIGHT,
@@ -87,7 +85,16 @@ module WarehouseKeeper
 
     def move(direction)
       game.send("move_#{direction}")
-      game.next_level if game.solved?
+      if game.solved?
+        animate(1) do |animation|  # introduce a small delay
+          animation.finish do
+            if game.solved?  # make sure it's still solved
+              game.next_level
+              screen_manager.activate_screen(:announce, game)
+            end
+          end
+        end
+      end
     end
   end
 end

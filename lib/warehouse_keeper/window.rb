@@ -12,8 +12,9 @@ module WarehouseKeeper
       self.caption = WINDOW_TITLE
 
       @screen_manager = ScreenManager.new(self)
+      @screen_manager.add_screen(:announce, AnnounceScreen)
       @screen_manager.add_screen(:play, PlayScreen)
-      @screen_manager.activate_screen(:play, Game.new(start_level))
+      @screen_manager.activate_screen(:announce, Game.new(start_level))
     end
 
     attr_reader :screen_manager

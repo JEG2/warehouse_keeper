@@ -8,10 +8,10 @@ module WarehouseKeeper
       reset
     end
 
-    attr_reader :level
+    attr_reader :current_level, :level
 
-    attr_reader :current_level, :player_x, :player_y, :total_gems, :gems_on_goal
-    private     :current_level, :player_x, :player_y, :total_gems, :gems_on_goal
+    attr_reader :player_x, :player_y, :total_gems, :gems_on_goal
+    private     :player_x, :player_y, :total_gems, :gems_on_goal
 
     def reset
       @level = Level.from_file(current_level)
