@@ -10,11 +10,11 @@ module WarehouseKeeper
     private     :screens, :active, :window
 
     def add_screen(name, screen_type)
-      @screens[name] = screen_type
+      screens[name] = screen_type
     end
 
     def activate_screen(name, *extra_args)
-      @active = screens[name].new(window, self, *extra_args)
+      @active = screens.fetch(name).new(window, self, *extra_args)
     end
 
     def update
