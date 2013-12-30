@@ -6,7 +6,7 @@ This repository is a simple recreation of [Sokoban](http://en.wikipedia.org/wiki
 
 I think the process of how this repository reached its current from is worth discussing.
 
-First, [a good friend](https://github.com/piisalie) and myself built the first working version one day, just to get a feel for working with Ruby Gosu.  To a player, that version would feel pretty close to the game it is today, but the interface code was very thrown together.
+It got started [a good friend](https://github.com/piisalie) and myself built the first working version one day, just to get a feel for working with Ruby Gosu.  To a player, that version would feel pretty close to the game it is today, but the interface code was very thrown together.
 
 I decided to refactor what we had built, but I wanted to use some heavy restraints to keep myself from over building it.  These are the rules I used:
 
@@ -23,9 +23,9 @@ Because I followed this process so closely, I feel I've landed on an almost mini
 
 The main components are:
 
-* A control mapper
-* A screen manager
-* An animation tool
+* [A control mapper](#holding-down-keys)
+* [A screen manager](#changing-the-view)
+* [An animation tool](#the-flow-of-time)
 
 ### Holding Down Keys
 
@@ -33,7 +33,7 @@ In our initial version of the game you couldn't just hold down the left arrow.  
 
 When I went to fix this, I realized that mapping keys (or controls in general) will pretty much always need to happen in a game.  You need to be able to say which key does what and you often want to be able to specify variations like whether or not a key can be held.
 
-This led to the first general extraction:  a [KeyMap](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/key_map.rb).  This is a super simple mapping of key codes to some code to run when they are pressed.
+This led to the first general extraction:  a [`KeyMap`](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/key_map.rb).  This is a super simple mapping of key codes to some code to run when they are pressed.
 
 I resisted adding several features to this class, because this game didn't need them, but I could see other games needing to address concerns like:
 
@@ -43,28 +43,26 @@ I resisted adding several features to this class, because this game didn't need 
 
 ### Changing the View
 
-Originally, I couldn't imagine a minimal game needing to show more than a level screen.  While our early versions did just that, it's not too ideal.  It makes it hard to keep track of which level you're on, unless you incorporate some text into the level screen and that's [a different challenge](https://github.com/JEG2/warehouse_keeper#what-i-still-want).
+Originally, I couldn't imagine a minimal game needing to show more than a level screen.  While our early versions did just that, it's not too ideal.  It makes it hard to keep track of which level you're on, unless you incorporate some text into the level screen and that's [a different challenge](#what-i-still-want).
 
-Also, what do you do when the game ends?  Just quit?
+Also, what do you do when the game ends?  Just quit?  Bigger games may need things like menus.  It goes on and on.
 
-Bigger games may need things like menus.  It goes on and on.
-
-You need some way to be able to switch out the screen that the user is currently viewing.  Again, I took about the most basic approach imaginable here.  There's a trivial [ScreenManager](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/screen_manager.rb) that manages a list of screens and can activate one from that list as needed.  Those screens can inherit from a base [Screen](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/screen.rb) class to gain access to a few hooks and helper methods.
+You need some way to be able to switch out the screen that the user is currently viewing.  Again, I took about the most basic approach imaginable here.  There's a trivial [`ScreenManager`](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/screen_manager.rb) that manages a list of screens and can activate one from that list as needed.  Those screens inherit from a base [`Screen`](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/screen.rb) class to gain access to a few hooks and helper methods.
 
 I could definitely see this tool being expanded in several ways:
 
 * You may want to reuse some screens instead of recreating them each time
 * I can see a big need for dialog-like functionality in many games
 * There's probably a need for screens-inside-screens in a lot of games
-* The helper tools provided by the base Screen are a sea of infinite possibilities
+* The helpers provided by the base `Screen` are a sea of infinite possibilities
 
 ### The Flow of Time
 
 Another thing I couldn't imagine my simple game needing was animation.  I thought redrawing the changed board would be enough.  Here's just one thing you see when you do that though:  you finish a level and find yourself at the start of the next level before you even have time to notice the final piece in its place.
 
-Controlling how things appear over time in game terms is animation.  Adding a simple [Animation](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/animation.rb) tool allowed me to do traditional things like [fade out a title](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/announce_screen.rb#L20) but also [just delay the flow of time](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/play_screen.rb#L89).
+Controlling how things appear over time in game terms is animation.  Adding a simple [`Animation`](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/animation.rb) tool allowed me to do traditional things like [fade out a title](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/announce_screen.rb#L20) but also just [delay the flow of time](https://github.com/JEG2/warehouse_keeper/blob/master/lib/warehouse_keeper/play_screen.rb#L89).
 
-The main thing I debated over adding here, was simple helpers for things like delays or repeating tasks.  These tricks are already doable with the code I built, but the interface could be smoothed out a little for them.  I didn't have a big enough need here to justify it, but I could see someone wanting to do these things in the future.
+The main thing I debated adding here was simple helpers for things like delays or repeating tasks.  These tricks are already doable with the code I built, but the API could be smoothed out a little for them.  I didn't have a big enough need here to justify it, but I could see someone wanting to do these things in the future.
 
 ## What I Still Want
 
@@ -72,9 +70,9 @@ This game does some super crude [scaling of the tileset down to an arbitrary win
 
 That said, if you want to remotely attempt to make use of the space available on a player's monitor, you will have to do something like this.  For that, I would sure love a tool that helps me handle the trickier parts.  I believe Gosu provides enough of what you need to get this right.
 
-What Gosu doesn't provide to my liking was proper font measuring tools.  I really wanted to be able to get the width a given string of text would be on screen in pixels, but I can't see a way to do this.  (You can get the height.)
+Another thing I really struggled with in Gosu was working with text.  It's easy to get the height of some arbitrary string, but getting the width is trickier. I think I found a way to do it with `Gosu::Image.from_text()`, but I haven't had time to dig into this yet.
 
-I think this makes certain combinations of text and sprites tricky.  Gosu does have a relative drawing method that can help with some cases.  But I don't think it address all of what I would like to be able to do.
+Knowing the dimensions of some text is very helpful if you want to combine it with the use of sprites, at least how I do things.  Gosu does have a relative drawing method that can help with some of these cases.  In the end, I think I just need to play with these options more to figure this stuff out.
 
 ## The Testing Balance
 
